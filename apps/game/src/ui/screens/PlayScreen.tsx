@@ -64,7 +64,7 @@ export function PlayScreen() {
         <div className="board-area">
           <MissionBar />
           <div className="board-fit">
-            <PhaserBoard key="board" />
+            <PhaserBoard key={settings.boardIso ? "iso" : "flat"} iso={settings.boardIso} />
           </div>
         </div>
 

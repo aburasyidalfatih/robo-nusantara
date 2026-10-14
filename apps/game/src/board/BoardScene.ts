@@ -24,7 +24,8 @@ import rangkiangUrl from "../assets/sprites/rangkiang.svg";
 import rumputUrl from "../assets/sprites/rumput.svg";
 import sayapUrl from "../assets/sprites/sayap.svg";
 
-export type Emote = "heart" | "dizzy" | "question" | "padi";
+import type { Emote } from "./bridge";
+export type { Emote };
 
 /** Ukuran satu petak dalam piksel dunia game (ditampilkan diperkecil sesuai layar). */
 const CELL = 128;

@@ -6,7 +6,7 @@
 import { numberCards, simulate, type SimResult, type SimStep } from "@robo/engine";
 import { sfx } from "../audio/sound";
 import { board } from "../board/bridge";
-import type { BoardScene } from "../board/BoardScene";
+import type { BoardLike } from "../board/bridge";
 import { t } from "../copy/id";
 import { currentLevel, useGame } from "../state/store";
 
@@ -39,7 +39,7 @@ useGame.subscribe((s, prev) => {
   }
 });
 
-async function scene(): Promise<BoardScene | null> {
+async function scene(): Promise<BoardLike | null> {
   const s = board.get();
   if (!s) return null;
   await s.ready;
@@ -51,7 +51,7 @@ function timing() {
   return { anim: Math.round(speed * 0.78), gap: Math.round(speed * 0.22) };
 }
 
-async function playOne(step: SimStep, s: BoardScene): Promise<void> {
+async function playOne(step: SimStep, s: BoardLike): Promise<void> {
   game().setActiveStep({ nodeId: step.nodeId, ...(step.loop ? { loop: step.loop } : {}) });
   if (step.kind === "turn") sfx.turn();
   else if (step.kind === "bump") sfx.bump();
@@ -77,7 +77,7 @@ function prepare(): SimResult | null {
   return sim;
 }
 
-async function finish(sim: SimResult, s: BoardScene, my: number): Promise<void> {
+async function finish(sim: SimResult, s: BoardLike, my: number): Promise<void> {
   if (session) session.done = true;
   const store = game();
   store.setActiveStep(null);

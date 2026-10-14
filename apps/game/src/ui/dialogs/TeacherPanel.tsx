@@ -54,6 +54,21 @@ export function TeacherPanel() {
           </span>
         </div>
 
+        <div className="row">
+          <span>
+            {t.boardStyle}
+            <small>{t.boardStyleNote}</small>
+          </span>
+          <span className="seg" role="group" aria-label={t.boardStyle}>
+            <button type="button" aria-pressed={settings.boardIso} onClick={() => update({ boardIso: true })}>
+              {t.boardIso}
+            </button>
+            <button type="button" aria-pressed={!settings.boardIso} onClick={() => update({ boardIso: false })}>
+              {t.boardFlat}
+            </button>
+          </span>
+        </div>
+
         {toggles.map((row) => (
           <div className="row" key={row.key}>
             <span>

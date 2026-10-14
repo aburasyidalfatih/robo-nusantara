@@ -3,17 +3,21 @@ import { useEffect, useRef } from "react";
 import { currentLevel, useGame } from "../state/store";
 import { BoardScene, boardPixelSize } from "./BoardScene";
 import { board } from "./bridge";
+import { IsoBoardScene, isoPixelSize } from "./IsoBoardScene";
 
-/** Wadah React untuk papan Phaser. Papan menyesuaikan ukuran wadahnya (Scale.FIT). */
-export function PhaserBoard() {
+/**
+ * Wadah React untuk papan Phaser. Papan menyesuaikan ukuran wadahnya (Scale.FIT).
+ * `iso` memilih papan isometrik (2.5D) atau papan datar yang lebih ringan.
+ */
+export function PhaserBoard({ iso }: { iso: boolean }) {
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const parent = host.current;
     if (!parent) return;
     const level = currentLevel(useGame.getState());
-    const { width, height } = boardPixelSize(level);
-    const scene = new BoardScene();
+    const { width, height } = iso ? isoPixelSize(level) : boardPixelSize(level);
+    const scene = iso ? new IsoBoardScene() : new BoardScene();
 
     const game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -41,7 +45,7 @@ export function PhaserBoard() {
       board.detach(scene);
       game.destroy(true);
     };
-  }, []);
+  }, [iso]);
 
   return <div className="board-host" ref={host} aria-label="Papan sawah" role="img" />;
 }

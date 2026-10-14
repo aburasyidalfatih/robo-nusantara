@@ -26,6 +26,8 @@ export interface Settings {
   music: boolean;
   sfx: boolean;
   unlockAll: boolean;
+  /** Papan isometrik (2.5D) atau papan sederhana dari atas. */
+  boardIso: boolean;
 }
 
 export interface SaveData {
@@ -43,6 +45,7 @@ export const DEFAULT_SETTINGS: Settings = {
   music: true,
   sfx: true,
   unlockAll: false,
+  boardIso: true,
 };
 
 export const EMPTY_PROGRESS: Progress = { stars: {}, tutorialDone: false, badges: [] };
