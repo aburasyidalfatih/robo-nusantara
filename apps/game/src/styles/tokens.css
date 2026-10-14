@@ -1,0 +1,52 @@
+/*
+ * Token desain Robo Nusantara.
+ * Satu tampilan siang hari di sawah berundak (sengaja satu tema terang).
+ */
+:root {
+  color-scheme: light;
+
+  /* langit dan latar */
+  --sky-1: #b9e1f0;
+  --sky-2: #e6f4e6;
+  --bg: #e7f0e1;
+  --hill-1: #a9d17e;
+  --hill-2: #8cc062;
+  --hill-3: #73ab4c;
+
+  /* permukaan */
+  --panel: #fbfdf7;
+  --panel-2: #f2f7ee;
+  --line: #cadbc1;
+  --plank: #c99a5b;
+  --plank-dark: #a47640;
+
+  /* teks */
+  --ink: #1c2a1f;
+  --ink-soft: #4a5d4d;
+  --ink-faint: #7a8c7c;
+
+  /* Bima */
+  --bima: #2463b5;
+  --bima-dark: #17427c;
+  --lamp: #ffc93c;
+
+  /* kartu perintah: warna = makna, konsisten di semua jenjang */
+  --c-maju: #2463b5;
+  --c-kiri: #7b3fa8;
+  --c-kanan: #c4531a;
+  --c-ulangi: #2b8452;
+
+  /* status */
+  --ok: #2b8452;
+  --ok-dark: #1b5c38;
+  --warn: #b06d07;
+  --danger: #b23a2b;
+  --danger-dark: #7e2419;
+
+  --font-display: "Fredoka", "Baloo 2", ui-rounded, system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+
+  --gut-l: max(16px, env(safe-area-inset-left, 0px));
+  --gut-r: max(16px, env(safe-area-inset-right, 0px));
+  --radius: 16px;
+}

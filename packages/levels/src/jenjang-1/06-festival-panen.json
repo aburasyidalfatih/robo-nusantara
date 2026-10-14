@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schema/level.schema.json",
+  "id": "j1-06",
+  "jenjang": 1,
+  "order": 6,
+  "name": "Festival Panen",
+  "modul": "Proyek akhir · Festival Panen",
+  "map": [
+    "~~#~~~",
+    "~#~~#~",
+    "~~~pL#",
+    "~~p.~~",
+    "~p.~#~",
+    "B.~~~~"
+  ],
+  "startDir": "E",
+  "target": 6,
+  "palette": [
+    "maju",
+    "kiri",
+    "kanan",
+    "ulangi"
+  ],
+  "mission": "Hari Festival Panen! Panen tiga ikat padi di tangga sawah, lalu antar ke rangkiang. Cari polanya.",
+  "hint": "Lihat jalannya: maju, belok, maju, belok… Bagian mana yang berulang, dan berapa kali?",
+  "bridge": "Rancang labirin sawahmu sendiri di kertas berpetak, lalu tantang keluargamu menyusun programnya.",
+  "solution": [
+    {
+      "rep": 3,
+      "body": [
+        "M",
+        "L",
+        "M",
+        "R"
+      ]
+    },
+    "M"
+  ]
+}

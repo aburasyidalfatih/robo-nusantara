@@ -1,0 +1,12 @@
+{
+  "name": "Robo Nusantara",
+  "short_name": "Robo Nusantara",
+  "description": "Game belajar coding dan robotik untuk anak",
+  "lang": "id",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#e7f0e1",
+  "theme_color": "#2463b5",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

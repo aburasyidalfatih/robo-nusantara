@@ -1,0 +1,22 @@
+{
+  "name": "robo-nusantara",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Game belajar coding dan robotik untuk anak 6–15 tahun",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@robo/game",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "check": "turbo run typecheck test build",
+    "preview": "pnpm --filter @robo/game preview"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "~5.9.3"
+  }
+}

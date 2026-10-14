@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schema/level.schema.json",
+  "id": "j1-01",
+  "jenjang": 1,
+  "order": 1,
+  "name": "Lurus ke Rangkiang",
+  "modul": "Modul 2 · Urutan",
+  "map": [
+    ".#..~",
+    ".....",
+    "Bp.L.",
+    ".....",
+    "~~..#"
+  ],
+  "startDir": "E",
+  "target": 3,
+  "palette": [
+    "maju"
+  ],
+  "mission": "Bima harus membawa padi ke rangkiang. Susun kartu Maju sampai ia tiba di sana!",
+  "hint": "Hitung petak dari Bima ke rangkiang. Satu kartu Maju berarti satu petak.",
+  "bridge": "Di rumah, tulis “program” berjalan dari kamar ke dapur. Berapa langkah yang kamu butuhkan?",
+  "solution": [
+    "M",
+    "M",
+    "M"
+  ],
+  "tutorial": true
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "../../schema/level.schema.json",
+  "id": "j1-04",
+  "jenjang": 1,
+  "order": 4,
+  "name": "Panen Berjajar",
+  "modul": "Modul 4 · Pola dan ulangi",
+  "map": [
+    "#..~..#",
+    ".......",
+    "BpppppL",
+    ".......",
+    "~~#..~~"
+  ],
+  "startDir": "E",
+  "target": 2,
+  "palette": [
+    "maju",
+    "kiri",
+    "kanan",
+    "ulangi"
+  ],
+  "mission": "Lima ikat padi berjajar! Seret kartu Ulangi, lalu masukkan kartu Maju ke dalamnya.",
+  "hint": "Kartu Maju-nya sama terus. Kartu mana yang bisa mengulang perintah berkali-kali?",
+  "bridge": "Cari pola berulang di sekitarmu: anak tangga, motif songket, atau barisan tanaman padi.",
+  "solution": [
+    {
+      "rep": 6,
+      "body": [
+        "M"
+      ]
+    }
+  ]
+}

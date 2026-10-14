@@ -1,0 +1,32 @@
+{
+  "$schema": "../../schema/level.schema.json",
+  "id": "j1-02",
+  "jenjang": 1,
+  "order": 2,
+  "name": "Belok Pertama",
+  "modul": "Modul 3 · Belok kiri, belok kanan",
+  "map": [
+    "#...~",
+    "..L.~",
+    "#.p..",
+    "B....",
+    "~~#.."
+  ],
+  "startDir": "E",
+  "target": 5,
+  "palette": [
+    "maju",
+    "kiri",
+    "kanan"
+  ],
+  "mission": "Rangkiang ada di atas sana. Bima perlu berbelok satu kali. Jangan lupa panen padinya!",
+  "hint": "Kiri dan kanan dihitung dari arah hadap Bima, bukan dari arahmu. Di petak mana Bima harus berbelok?",
+  "bridge": "Saat berangkat ke sekolah, kapan kamu belok kiri dan kapan belok kanan? Coba ceritakan rutenya.",
+  "solution": [
+    "M",
+    "M",
+    "L",
+    "M",
+    "M"
+  ]
+}

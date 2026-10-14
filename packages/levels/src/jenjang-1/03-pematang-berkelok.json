@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schema/level.schema.json",
+  "id": "j1-03",
+  "jenjang": 1,
+  "order": 3,
+  "name": "Pematang Berkelok",
+  "modul": "Modul 3 · Belok kiri, belok kanan",
+  "map": [
+    "~~#~~~",
+    "~~..L~",
+    "~~p~~#",
+    ".p.~~~",
+    ".~~~#~",
+    "B~~~~~"
+  ],
+  "startDir": "N",
+  "target": 11,
+  "palette": [
+    "maju",
+    "kiri",
+    "kanan"
+  ],
+  "mission": "Pematang ini berkelok-kelok. Hindari petak berair dan panen dua ikat padi.",
+  "hint": "Telusuri jalannya dengan jarimu dulu. Setiap jalan berbelok, Bima butuh satu kartu belok.",
+  "bridge": "Main “robot manusia” dengan teman: beri perintah maju, kiri, kanan sampai ia menemukan tasmu.",
+  "solution": [
+    "M",
+    "M",
+    "R",
+    "M",
+    "M",
+    "L",
+    "M",
+    "M",
+    "R",
+    "M",
+    "M"
+  ]
+}

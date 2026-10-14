@@ -1,0 +1,57 @@
+{
+  "$schema": "../../schema/level.schema.json",
+  "id": "j1-05",
+  "jenjang": 1,
+  "order": 5,
+  "name": "Tangkap Kumbang Galat",
+  "modul": "Modul 5 · Debugging",
+  "map": [
+    "~~#~~",
+    "~#~pL",
+    "#~p.~",
+    "#..#~",
+    "B.#~~"
+  ],
+  "startDir": "E",
+  "target": 13,
+  "palette": [
+    "maju",
+    "kiri",
+    "kanan",
+    "ulangi"
+  ],
+  "mission": "Gawat! Kumbang Galat menukar dua kartu di program Bima. Jalankan, temukan kesalahannya, lalu perbaiki.",
+  "hint": "Pakai tombol Langkah. Perhatikan kartu mana yang membuat Bima mulai salah arah.",
+  "bridge": "Pernah salah urutan saat memakai sepatu sebelum kaus kaki? Itu juga bug! Bagaimana cara kamu memperbaikinya?",
+  "solution": [
+    "M",
+    "L",
+    "M",
+    "R",
+    "M",
+    "L",
+    "M",
+    "R",
+    "M",
+    "L",
+    "M",
+    "R",
+    "M"
+  ],
+  "prefill": [
+    "M",
+    "L",
+    "M",
+    "R",
+    "M",
+    "R",
+    "M",
+    "L",
+    "M",
+    "L",
+    "M",
+    "R",
+    "M"
+  ],
+  "feature": "kumbang-galat"
+}
