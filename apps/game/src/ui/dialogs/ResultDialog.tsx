@@ -3,6 +3,8 @@ import { speak } from "../../audio/narrator";
 import { t } from "../../copy/id";
 import { resetBoard } from "../../game/runner";
 import { LEVELS, useGame } from "../../state/store";
+import { badgeById } from "../../copy/badges";
+import { BadgeIcon } from "../Badge";
 import { BimaFace } from "../Bima";
 import { Star } from "../icons";
 
@@ -11,8 +13,10 @@ export function ResultDialog() {
   const result = useGame((s) => s.result);
   const levelIndex = useGame((s) => s.levelIndex);
   const narration = useGame((s) => s.settings.narration);
+  const avatar = useGame((s) => s.profile?.avatar ?? "biru");
   const primary = useRef<HTMLButtonElement>(null);
   const level = LEVELS[levelIndex];
+  const badge = result?.newBadge ? badgeById(result.newBadge) : undefined;
 
   useEffect(() => {
     if (!result) return;
@@ -33,7 +37,7 @@ export function ResultDialog() {
   return (
     <div className="overlay" onClick={(e) => e.target === e.currentTarget && game().closeResult()}>
       <div className="sheet result" role="dialog" aria-modal="true" aria-labelledby="result-title">
-        <BimaFace mood="happy" className="result-bima" />
+        <BimaFace mood="happy" avatar={avatar} className="result-bima" />
         <p className="eyebrow">
           Level {level.order} · {level.name}
         </p>
@@ -53,6 +57,15 @@ export function ResultDialog() {
             </li>
           ))}
         </ul>
+        {badge && (
+          <div className="new-badge">
+            <BadgeIcon badge={badge} earned />
+            <div>
+              <small>{t.newBadge}</small>
+              <b>{badge.name}</b>
+            </div>
+          </div>
+        )}
         <div className="bridge">
           <h3>{t.bridgeTitle}</h3>
           <p>{level.bridge}</p>

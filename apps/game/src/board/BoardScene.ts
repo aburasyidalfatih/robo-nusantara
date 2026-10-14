@@ -8,7 +8,11 @@
  */
 import Phaser from "phaser";
 import { directionAngle, gridSize, pointKey, startPoint, tileAt, type Level, type Point, type SimStep } from "@robo/engine";
+import type { AvatarColor } from "../state/persistence";
+import batuUrl from "../assets/sprites/batu.svg";
+import bebekUrl from "../assets/sprites/bebek.svg";
 import bimaUrl from "../assets/sprites/bima-top.svg";
+import bungaUrl from "../assets/sprites/bunga.svg";
 import emoteDizzyUrl from "../assets/sprites/emote-dizzy.svg";
 import emoteHeartUrl from "../assets/sprites/emote-heart.svg";
 import emotePadiUrl from "../assets/sprites/emote-padi.svg";
@@ -17,6 +21,8 @@ import padiStubUrl from "../assets/sprites/padi-stub.svg";
 import padiUrl from "../assets/sprites/padi.svg";
 import pohonUrl from "../assets/sprites/pohon.svg";
 import rangkiangUrl from "../assets/sprites/rangkiang.svg";
+import rumputUrl from "../assets/sprites/rumput.svg";
+import sayapUrl from "../assets/sprites/sayap.svg";
 
 export type Emote = "heart" | "dizzy" | "question" | "padi";
 
@@ -33,12 +39,36 @@ const COLORS = {
   danger: 0xe2455a,
 };
 
+/** Warna tubuh Bima di sprite tampak atas, diganti sesuai avatar anak. */
+const BASE_BODY = { dark: "#2463b5", light: "#5f9ce4" };
+const AVATAR_BODY: Record<AvatarColor, { dark: string; light: string }> = {
+  biru: { dark: "#2463b5", light: "#5f9ce4" },
+  hijau: { dark: "#2b8452", light: "#5fbf86" },
+  jingga: { dark: "#c4531a", light: "#ef8a4c" },
+  ungu: { dark: "#7b3fa8", light: "#aa75d6" },
+};
+
 export function boardPixelSize(level: Pick<Level, "map">): { width: number; height: number } {
   const { cols, rows } = gridSize(level);
   return { width: cols * CELL + PAD * 2, height: rows * CELL + PAD * 2 + SHADOW };
 }
 
 const center = (p: Point) => ({ x: PAD + p.x * CELL + CELL / 2, y: PAD + p.y * CELL + CELL / 2 });
+
+/** Pembangkit angka acak deterministik, supaya dekorasi tiap level selalu sama. */
+function seeded(seed: string): () => number {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  };
+}
 
 interface PadiSprite {
   image: Phaser.GameObjects.Image;
@@ -49,11 +79,13 @@ export class BoardScene extends Phaser.Scene {
   readonly ready: Promise<void>;
   private resolveReady!: () => void;
   private created = false;
-  private pending: Level | null = null;
+  private pending: { level: Level; avatar: AvatarColor } | null = null;
   private level: Level | null = null;
+  private avatar: AvatarColor = "biru";
   private reducedMotion = false;
 
   private layer: Phaser.GameObjects.Container | null = null;
+  private ambient: Phaser.GameObjects.Container | null = null;
   private robot: Phaser.GameObjects.Image | null = null;
   private heading = 0;
   private emote: Phaser.GameObjects.Image | null = null;
@@ -70,11 +102,16 @@ export class BoardScene extends Phaser.Scene {
   preload(): void {
     const big = { width: 256, height: 256 };
     const small = { width: 96, height: 96 };
-    this.load.svg("bima", bimaUrl, big);
+    this.load.text("bima-src", bimaUrl);
     this.load.svg("padi", padiUrl, big);
     this.load.svg("padi-stub", padiStubUrl, big);
     this.load.svg("pohon", pohonUrl, big);
     this.load.svg("rangkiang", rangkiangUrl, big);
+    this.load.svg("bebek", bebekUrl, big);
+    this.load.svg("sayap", sayapUrl, { width: 48, height: 64 });
+    this.load.svg("bunga", bungaUrl, small);
+    this.load.svg("rumput", rumputUrl, small);
+    this.load.svg("batu", batuUrl, small);
     this.load.svg("emote-heart", emoteHeartUrl, small);
     this.load.svg("emote-dizzy", emoteDizzyUrl, small);
     this.load.svg("emote-question", emoteQuestionUrl, small);
@@ -84,9 +121,20 @@ export class BoardScene extends Phaser.Scene {
   create(): void {
     this.reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     this.makeTileTextures();
-    this.created = true;
-    this.resolveReady();
-    if (this.pending) this.setup(this.pending);
+
+    // Sprite Bima dibuat per warna avatar dari satu SVG sumber.
+    const src = this.cache.text.get("bima-src") as string | undefined;
+    for (const [name, body] of Object.entries(AVATAR_BODY) as [AvatarColor, { dark: string; light: string }][]) {
+      const svg = (src ?? "").split(BASE_BODY.dark).join(body.dark).split(BASE_BODY.light).join(body.light);
+      const uri = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+      if (src) this.load.svg(`bima-${name}`, uri, { width: 256, height: 256 });
+    }
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      this.created = true;
+      this.resolveReady();
+      if (this.pending) this.setup(this.pending.level, this.pending.avatar);
+    });
+    this.load.start();
   }
 
   override update(): void {
@@ -94,25 +142,28 @@ export class BoardScene extends Phaser.Scene {
   }
 
   /** Bangun ulang papan untuk level baru. Aman dipanggil sebelum scene siap. */
-  setup(level: Level): void {
+  setup(level: Level, avatar: AvatarColor = "biru"): void {
     if (!this.created) {
-      this.pending = level;
+      this.pending = { level, avatar };
       return;
     }
     this.pending = null;
     this.level = level;
+    this.avatar = avatar;
     const { width, height } = boardPixelSize(level);
     this.scale.setGameSize(width, height);
     this.cameras.main.setSize(width, height);
 
     this.tweens.killAll();
     this.layer?.destroy(true);
+    this.ambient?.destroy(true);
     this.padi.clear();
     this.harvested.clear();
     this.emote = null;
 
     const layer = this.add.container(0, 0);
     this.layer = layer;
+    const rnd = seeded(level.id);
 
     const base = this.add.graphics();
     base.fillStyle(COLORS.pematangShadow, 1).fillRoundedRect(0, SHADOW, width, height - SHADOW, 24);
@@ -120,13 +171,26 @@ export class BoardScene extends Phaser.Scene {
     base.fillStyle(COLORS.pematang, 1).fillRoundedRect(0, 0, width, height - SHADOW, 24);
     layer.add(base);
 
+    const water: Point[] = [];
     level.map.forEach((row, y) => {
       [...row].forEach((code, x) => {
         const c = center({ x, y });
-        const ground = code === "~" ? "tile-air" : "tile-sawah";
+        const variant = Math.floor(rnd() * 3);
+        const ground = code === "~" ? "tile-air" : `tile-sawah-${variant}`;
         layer.add(this.add.image(c.x, c.y, ground));
-        if (code === "~") this.addWaterGlint(layer, c.x, c.y, x + y);
-        if (code === "#") layer.add(this.add.image(c.x, c.y, "pohon").setDisplaySize(CELL * 0.86, CELL * 0.86));
+        if (code === "~") {
+          this.addWaterGlint(layer, c.x, c.y, x + y);
+          water.push({ x, y });
+        }
+        if (code === "." || code === "B") this.decorate(layer, c, rnd);
+        if (code === "#") {
+          const tree = this.add.image(c.x, c.y + CELL * 0.36, "pohon").setOrigin(0.5, 0.86).setDisplaySize(CELL * 0.9, CELL * 0.9);
+          layer.add(tree);
+          if (!this.reducedMotion) {
+            tree.setAngle(-1.5);
+            this.tweens.add({ targets: tree, angle: 1.5, duration: 2600 + rnd() * 800, yoyo: true, repeat: -1, ease: "Sine.easeInOut", delay: rnd() * 1500 });
+          }
+        }
         if (code === "L") layer.add(this.add.image(c.x, c.y, "rangkiang").setDisplaySize(CELL * 0.9, CELL * 0.9));
         if (code === "p") {
           const img = this.add
@@ -139,10 +203,14 @@ export class BoardScene extends Phaser.Scene {
       });
     });
 
-    const robot = this.add.image(0, 0, "bima").setDisplaySize(CELL * 0.82, CELL * 0.82);
+    const robot = this.add.image(0, 0, `bima-${this.avatar}`).setDisplaySize(CELL * 0.82, CELL * 0.82);
     layer.add(robot);
     this.robot = robot;
     this.resetRobot();
+
+    this.ambient = this.add.container(0, 0);
+    this.addDuck(water, rnd);
+    this.addButterfly(width, height, rnd);
   }
 
   /** Kembalikan Bima ke titik awal dan pulihkan padi yang sudah dipanen. */
@@ -182,6 +250,7 @@ export class BoardScene extends Phaser.Scene {
         const where = step.harvested;
         this.time.delayedCall(dur * 0.55, () => this.harvest(where));
       }
+      this.dust(robot.x, robot.y);
       return this.tween({ targets: robot, x: to.x, y: to.y, duration: dur, ease: "Sine.easeInOut" });
     }
 
@@ -191,6 +260,7 @@ export class BoardScene extends Phaser.Scene {
     const nudge = { x: from.x + (blocked.x - from.x) * 0.3, y: from.y + (blocked.y - from.y) * 0.3 };
     this.flashTile(step.blockedAt);
     this.showEmote("dizzy");
+    this.cameras.main.shake(180, 0.004);
     return this.tween({ targets: robot, x: nudge.x, y: nudge.y, duration: dur * 0.35, ease: "Quad.easeOut", yoyo: true }).then(() =>
       this.tween({ targets: robot, x: from.x + 6, duration: 50, yoyo: true, repeat: 2 }).then(() => {
         robot.setPosition(from.x, from.y);
@@ -247,6 +317,87 @@ export class BoardScene extends Phaser.Scene {
     this.tweens.killTweensOf(this.emote);
     this.emote.destroy();
     this.emote = null;
+  }
+
+  /** Hiasan kecil di petak sawah kosong: rumput, bunga, batu. */
+  private decorate(layer: Phaser.GameObjects.Container, c: { x: number; y: number }, rnd: () => number): void {
+    const roll = rnd();
+    if (roll > 0.42) return;
+    const key = roll < 0.2 ? "rumput" : roll < 0.34 ? "bunga" : "batu";
+    const size = key === "batu" ? CELL * 0.22 : CELL * 0.26;
+    const ox = (rnd() - 0.5) * CELL * 0.5;
+    const oy = (rnd() - 0.5) * CELL * 0.5;
+    const img = this.add.image(c.x + ox, c.y + oy, key).setDisplaySize(size, size).setAlpha(0.95);
+    layer.add(img);
+    if (key === "rumput" && !this.reducedMotion) {
+      img.setOrigin(0.5, 0.95).setAngle(-6);
+      this.tweens.add({ targets: img, angle: 6, duration: 1800 + rnd() * 900, yoyo: true, repeat: -1, ease: "Sine.easeInOut", delay: rnd() * 1200 });
+    }
+  }
+
+  /** Seekor bebek berenang bolak-balik di salah satu petak air. */
+  private addDuck(water: Point[], rnd: () => number): void {
+    if (!water.length || !this.ambient) return;
+    const spot = water[Math.floor(rnd() * water.length)] as Point;
+    const c = center(spot);
+    const duck = this.add.image(c.x - CELL * 0.16, c.y + CELL * 0.08, "bebek").setDisplaySize(CELL * 0.42, CELL * 0.42);
+    this.ambient.add(duck);
+    if (this.reducedMotion) return;
+    this.tweens.add({
+      targets: duck,
+      x: c.x + CELL * 0.16,
+      duration: 3200,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+      onYoyo: () => duck.setFlipX(true),
+      onRepeat: () => duck.setFlipX(false),
+    });
+    this.tweens.add({ targets: duck, y: c.y + CELL * 0.11, duration: 900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  }
+
+  /** Kupu-kupu yang sesekali melintasi papan. */
+  private addButterfly(width: number, height: number, rnd: () => number): void {
+    if (this.reducedMotion || !this.ambient) return;
+    const body = this.add.container(0, 0);
+    const left = this.add.image(-2, 0, "sayap").setOrigin(1, 0.5).setDisplaySize(CELL * 0.14, CELL * 0.19);
+    const right = this.add.image(2, 0, "sayap").setOrigin(1, 0.5).setDisplaySize(CELL * 0.14, CELL * 0.19).setFlipX(true);
+    right.setOrigin(0, 0.5);
+    body.add([left, right, this.add.ellipse(0, 0, 4, 18, 0x2b1d1a)]);
+    this.ambient.add(body);
+    const sx = left.scaleX;
+    this.tweens.add({ targets: [left, right], scaleX: sx * 0.25, duration: 140, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+
+    const fly = () => {
+      if (!body.scene) return;
+      const fromLeft = rnd() > 0.5;
+      const y0 = PAD + rnd() * (height - SHADOW - PAD * 2);
+      const y1 = PAD + rnd() * (height - SHADOW - PAD * 2);
+      body.setPosition(fromLeft ? -30 : width + 30, y0).setVisible(true);
+      this.tweens.add({
+        targets: body,
+        x: fromLeft ? width + 30 : -30,
+        y: y1,
+        duration: 7000 + rnd() * 4000,
+        ease: "Sine.easeInOut",
+        onComplete: () => {
+          body.setVisible(false);
+          this.time.delayedCall(4000 + rnd() * 8000, fly);
+        },
+      });
+      this.tweens.add({ targets: body, y: `+=${18}`, duration: 600, yoyo: true, repeat: 12, ease: "Sine.easeInOut" });
+    };
+    body.setVisible(false);
+    this.time.delayedCall(1500 + rnd() * 3000, fly);
+  }
+
+  private dust(x: number, y: number): void {
+    if (this.reducedMotion || !this.layer) return;
+    for (let i = 0; i < 3; i++) {
+      const dot = this.add.circle(x + (Math.random() - 0.5) * 20, y + CELL * 0.3, 5 + Math.random() * 4, 0xffffff, 0.55);
+      this.layer.add(dot);
+      this.tweens.add({ targets: dot, alpha: 0, scale: 0.2, y: dot.y + 10, duration: 420, onComplete: () => dot.destroy() });
+    }
   }
 
   private harvest(p: Point): void {
@@ -338,23 +489,41 @@ export class BoardScene extends Phaser.Scene {
       ctx.closePath();
     };
 
-    if (!this.textures.exists("tile-sawah")) {
-      const tex = this.textures.createCanvas("tile-sawah", size, size);
+    // Tiga variasi sawah: fase garis dan kecerahan sedikit berbeda agar tidak monoton.
+    const variants = [
+      { base: "#6aa03b", stripe: "#7db349", phase: 0 },
+      { base: "#689d3a", stripe: "#7fb64c", phase: 6 },
+      { base: "#6ca43e", stripe: "#7bb147", phase: 12 },
+    ];
+    variants.forEach((v, i) => {
+      const key = `tile-sawah-${i}`;
+      if (this.textures.exists(key)) return;
+      const tex = this.textures.createCanvas(key, size, size);
       const ctx = tex?.getContext();
-      if (tex && ctx) {
-        rounded(ctx, 16);
-        ctx.save();
-        ctx.clip();
-        ctx.fillStyle = "#6aa03b";
-        ctx.fillRect(0, 0, size, size);
-        ctx.fillStyle = "#7db349";
-        for (let x = 0; x < size; x += 18) ctx.fillRect(x, 0, 14, size);
-        ctx.fillStyle = "rgba(255,255,255,0.22)";
-        ctx.fillRect(0, 0, size, 5);
-        ctx.restore();
-        tex.refresh();
+      if (!tex || !ctx) return;
+      rounded(ctx, 16);
+      ctx.save();
+      ctx.clip();
+      ctx.fillStyle = v.base;
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = v.stripe;
+      for (let x = -18 + v.phase; x < size; x += 18) ctx.fillRect(x, 0, 13, size);
+      // guratan tanah tipis supaya ada tekstur
+      ctx.strokeStyle = "rgba(0,0,0,0.06)";
+      ctx.lineWidth = 2;
+      for (let y = 14; y < size; y += 22) {
+        ctx.beginPath();
+        ctx.moveTo(4, y);
+        ctx.quadraticCurveTo(size / 2, y + 4, size - 4, y);
+        ctx.stroke();
       }
-    }
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(0, 0, size, 5);
+      ctx.fillStyle = "rgba(0,0,0,0.08)";
+      ctx.fillRect(0, size - 5, size, 5);
+      ctx.restore();
+      tex.refresh();
+    });
 
     if (!this.textures.exists("tile-air")) {
       const tex = this.textures.createCanvas("tile-air", size, size);
@@ -368,6 +537,14 @@ export class BoardScene extends Phaser.Scene {
         grad.addColorStop(1, "#4c9cb2");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, size, size);
+        ctx.strokeStyle = "rgba(255,255,255,0.18)";
+        ctx.lineWidth = 2;
+        for (let y = 24; y < size; y += 28) {
+          ctx.beginPath();
+          ctx.moveTo(10, y);
+          ctx.bezierCurveTo(size * 0.3, y - 6, size * 0.6, y + 6, size - 10, y);
+          ctx.stroke();
+        }
         ctx.fillStyle = "rgba(0,0,0,0.08)";
         ctx.fillRect(0, 0, size, 6);
         ctx.restore();

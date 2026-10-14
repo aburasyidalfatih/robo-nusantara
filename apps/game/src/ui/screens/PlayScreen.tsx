@@ -20,11 +20,14 @@ export function PlayScreen() {
   const cards = useGame((s) => countCards(s.program));
   const galatFixed = useGame((s) => s.result !== null);
 
-  const toggle = (key: "music" | "sfx") => {
-    const value = !settings[key];
-    useGame.getState().updateSettings({ [key]: value });
-    if (key === "music") value ? music.start() : music.stop();
-    else if (value) sfx.click();
+  const soundOn = settings.music || settings.sfx;
+  const toggleSound = () => {
+    const value = !soundOn;
+    useGame.getState().updateSettings({ music: value, sfx: value });
+    if (value) {
+      music.start();
+      sfx.click();
+    } else music.stop();
   };
 
   return (
@@ -49,10 +52,7 @@ export function PlayScreen() {
           </b>
           <small>{level.modul}</small>
         </div>
-        <button type="button" className="round" aria-label={t.music} aria-pressed={settings.music} onClick={() => toggle("music")}>
-          {Icon.music()}
-        </button>
-        <button type="button" className="round" aria-label={t.sfx} aria-pressed={settings.sfx} onClick={() => toggle("sfx")}>
+        <button type="button" className="round" aria-label={t.sound} aria-pressed={soundOn} onClick={toggleSound}>
           {Icon.sound()}
         </button>
         <button type="button" className="round" aria-label={t.teacherPanel} onClick={() => useGame.getState().setTeacherOpen(true)}>

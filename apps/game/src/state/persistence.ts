@@ -8,6 +8,16 @@ export interface Progress {
   /** Bintang terbaik per id level. */
   stars: Record<string, number>;
   tutorialDone: boolean;
+  /** Lencana konsep yang sudah diraih (id lencana). */
+  badges: string[];
+}
+
+/** Warna Bima yang dipilih anak sebagai avatar. */
+export type AvatarColor = "biru" | "hijau" | "jingga" | "ungu";
+
+export interface Profile {
+  name: string;
+  avatar: AvatarColor;
 }
 
 export interface Settings {
@@ -22,6 +32,7 @@ export interface SaveData {
   version: 1;
   progress: Progress;
   settings: Settings;
+  profile: Profile | null;
 }
 
 const KEY = "robo-nusantara/save";
@@ -34,19 +45,31 @@ export const DEFAULT_SETTINGS: Settings = {
   unlockAll: false,
 };
 
-export const EMPTY_PROGRESS: Progress = { stars: {}, tutorialDone: false };
+export const EMPTY_PROGRESS: Progress = { stars: {}, tutorialDone: false, badges: [] };
 
 export function loadSave(): SaveData {
-  const fallback: SaveData = { version: 1, progress: { ...EMPTY_PROGRESS }, settings: { ...DEFAULT_SETTINGS } };
+  const fallback: SaveData = {
+    version: 1,
+    progress: { ...EMPTY_PROGRESS, stars: {}, badges: [] },
+    settings: { ...DEFAULT_SETTINGS },
+    profile: null,
+  };
   try {
     if (typeof localStorage === "undefined") return fallback;
     const raw = localStorage.getItem(KEY);
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as Partial<SaveData>;
+    const profile = parsed.profile;
     return {
       version: 1,
-      progress: { ...EMPTY_PROGRESS, ...parsed.progress, stars: { ...parsed.progress?.stars } },
+      progress: {
+        ...EMPTY_PROGRESS,
+        ...parsed.progress,
+        stars: { ...parsed.progress?.stars },
+        badges: Array.isArray(parsed.progress?.badges) ? parsed.progress.badges : [],
+      },
       settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+      profile: profile && typeof profile.name === "string" ? { name: profile.name, avatar: profile.avatar ?? "biru" } : null,
     };
   } catch {
     return fallback;

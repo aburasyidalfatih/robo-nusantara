@@ -74,13 +74,15 @@ Alasan pemilihan stack ada di dokumen desain Robo Nusantara dan di [docs/arsitek
 
 Sudah ada di Sprint 1:
 
-- Layar judul, peta wilayah, dan permainan layar penuh (desktop, tablet, ponsel)
+- Layar judul, profil anak (nama + warna Bima), peta desa, koleksi lencana, dan permainan layar penuh (desktop, tablet, ponsel)
 - 6 level Jenjang 1: urutan, belok, perulangan, debugging, proyek
 - Kartu seret-lepas: sisip, urutkan ulang, masuk blok Ulangi, buang, Batal
 - Bima berekspresi, petunjuk 3 tingkat, 3 bintang, Jembatan Dunia Nyata
 - Tutorial tangan penunjuk, panel guru, narasi suara, musik latar
+- Papan yang hidup: variasi petak, rumput dan bunga, kupu-kupu, bebek, pohon bergoyang
+- Transisi antarlayar, bendera di level selesai, lencana konsep per modul
 - Kemajuan tersimpan di perangkat
-- 53 unit test
+- 55 unit test
 
 Rencana sprint berikutnya:
 

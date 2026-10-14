@@ -58,6 +58,14 @@ export const Icon = {
     svg(<path d="M3 6l6-2.5 6 2.5 6-2.5v14.5L15 20.5 9 18l-6 2.5zM9 4.5V18M15 6v14.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" />),
   home: () => svg(<path d="M3 11l9-7.5 9 7.5v10h-6v-6H9v6H3z" fill="currentColor" />),
   lock: () => svg(<path d="M7 10V8a5 5 0 0 1 10 0v2h1v11H6V10zm2 0h6V8a3 3 0 0 0-6 0z" fill="currentColor" />),
+  badge: () =>
+    svg(
+      <>
+        <circle cx="12" cy="9" r="7" fill="currentColor" />
+        <path d="M8 14l-2 8 6-3 6 3-2-8" fill="currentColor" opacity=".7" />
+        <circle cx="12" cy="9" r="3" fill="#fff" />
+      </>,
+    ),
   drag: () =>
     svg(<path d="M12 3l3 3h-2v5h5V9l3 3-3 3v-2h-5v5h2l-3 3-3-3h2v-5H6v2l-3-3 3-3v2h5V6H9z" fill="currentColor" />),
 };

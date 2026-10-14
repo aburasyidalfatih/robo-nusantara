@@ -6,7 +6,7 @@ const game = () => useGame.getState();
 
 describe("status permainan", () => {
   beforeEach(() => {
-    useGame.setState({ progress: { stars: {}, tutorialDone: false } });
+    useGame.setState({ progress: { stars: {}, tutorialDone: false, badges: [] } });
     game().openLevel(3); // Panen Berjajar: semua kartu tersedia
   });
 
@@ -70,5 +70,25 @@ describe("status permainan", () => {
     game().addCard("maju");
     game().addCard("maju");
     expect(tutorialStep(game())).toBe(3);
+  });
+});
+
+describe("profil dan lencana", () => {
+  it("menyimpan profil dengan nama yang dirapikan", () => {
+    useGame.getState().saveProfile({ name: "  Andi Pratama Sutejo Wijaya Kusuma  ", avatar: "hijau" });
+    expect(useGame.getState().profile).toEqual({ name: "Andi Pratama Sutejo ", avatar: "hijau" });
+  });
+
+  it("memberi lencana sekali saja saat level modul selesai", () => {
+    useGame.setState({ progress: { stars: {}, tutorialDone: true, badges: [] } });
+    useGame.getState().openLevel(0);
+    for (let i = 0; i < 3; i++) useGame.getState().addCard("maju");
+    useGame.getState().completeLevel();
+    expect(useGame.getState().result?.newBadge).toBe("urutan");
+    useGame.getState().openLevel(0);
+    for (let i = 0; i < 3; i++) useGame.getState().addCard("maju");
+    useGame.getState().completeLevel();
+    expect(useGame.getState().result?.newBadge).toBeNull();
+    expect(useGame.getState().progress.badges).toEqual(["urutan"]);
   });
 });

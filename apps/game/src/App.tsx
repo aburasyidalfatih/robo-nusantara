@@ -6,12 +6,15 @@ import { Confetti } from "./ui/Confetti";
 import { DragGhost } from "./ui/dnd/DragGhost";
 import { ResultDialog } from "./ui/dialogs/ResultDialog";
 import { TeacherPanel } from "./ui/dialogs/TeacherPanel";
+import { CollectionScreen } from "./ui/screens/CollectionScreen";
 import { MapScreen } from "./ui/screens/MapScreen";
 import { PlayScreen } from "./ui/screens/PlayScreen";
+import { ProfileScreen } from "./ui/screens/ProfileScreen";
 import { TitleScreen } from "./ui/screens/TitleScreen";
 
 export function App() {
   const screen = useGame((s) => s.screen);
+  const nonce = useGame((s) => s.screenNonce);
   const sfx = useGame((s) => s.settings.sfx);
   const music = useGame((s) => s.settings.music);
 
@@ -25,9 +28,13 @@ export function App() {
 
   return (
     <div className="app">
-      {screen === "title" && <TitleScreen />}
-      {screen === "map" && <MapScreen />}
-      {screen === "play" && <PlayScreen />}
+      <div className="screen-enter" key={nonce}>
+        {screen === "title" && <TitleScreen />}
+        {screen === "profile" && <ProfileScreen />}
+        {screen === "map" && <MapScreen />}
+        {screen === "play" && <PlayScreen />}
+        {screen === "collection" && <CollectionScreen />}
+      </div>
       <ResultDialog />
       <TeacherPanel />
       <DragGhost />

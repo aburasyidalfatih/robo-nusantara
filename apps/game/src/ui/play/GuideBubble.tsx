@@ -11,6 +11,7 @@ const TOKEN_TYPE = { M: "maju", L: "kiri", R: "kanan" } as const;
 export function GuideBubble() {
   const say = useGame((s) => s.say);
   const narration = useGame((s) => s.settings.narration);
+  const avatar = useGame((s) => s.profile?.avatar ?? "biru");
 
   useEffect(() => {
     if (say.speak && narration) speak(say.text);
@@ -18,7 +19,7 @@ export function GuideBubble() {
 
   return (
     <div className="guide">
-      <BimaFace mood={say.mood} className="guide-bima" />
+      <BimaFace mood={say.mood} avatar={avatar} className="guide-bima" />
       <div className={`say k-${say.kind}`} role="status" aria-live="polite">
         <div className="say-body">
           <p>{say.text}</p>

@@ -1,17 +1,38 @@
+import type { CSSProperties } from "react";
+import type { AvatarColor } from "../state/persistence";
 import type { Mood } from "../state/store";
 
-/** Bima tampak depan, dengan ekspresi sesuai suasana hati. */
-export function BimaFace({ mood = "normal", className }: { mood?: Mood; className?: string }) {
+/** Palet tubuh Bima per warna avatar: badan gelap, badan terang, garis antena. */
+export const AVATAR_PALETTE: Record<AvatarColor, { dark: string; light: string; line: string }> = {
+  biru: { dark: "#2463b5", light: "#5f9ce4", line: "#17427c" },
+  hijau: { dark: "#2b8452", light: "#5fbf86", line: "#1b5c38" },
+  jingga: { dark: "#c4531a", light: "#ef8a4c", line: "#8a3a10" },
+  ungu: { dark: "#7b3fa8", light: "#aa75d6", line: "#54287a" },
+};
+
+/** Bima tampak depan, dengan ekspresi sesuai suasana hati dan warna avatar anak. */
+export function BimaFace({
+  mood = "normal",
+  avatar = "biru",
+  className,
+  style,
+}: {
+  mood?: Mood;
+  avatar?: AvatarColor;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  const c = AVATAR_PALETTE[avatar];
   return (
-    <svg viewBox="0 0 64 64" aria-hidden="true" className={`bima-face ${className ?? ""}`} data-mood={mood}>
-      <line x1="32" y1="5" x2="32" y2="13" stroke="#17427c" strokeWidth="2.5" />
+    <svg viewBox="0 0 64 64" aria-hidden="true" className={`bima-face ${className ?? ""}`} data-mood={mood} style={style}>
+      <line x1="32" y1="5" x2="32" y2="13" stroke={c.line} strokeWidth="2.5" />
       <circle className="lamp-glow" cx="32" cy="5" r="3.6" fill="#ffc93c" />
-      <rect x="5" y="40" width="9" height="15" rx="4.5" fill="#5f9ce4" />
-      <rect className="arm-r" x="50" y="40" width="9" height="15" rx="4.5" fill="#5f9ce4" />
+      <rect x="5" y="40" width="9" height="15" rx="4.5" fill={c.light} />
+      <rect className="arm-r" x="50" y="40" width="9" height="15" rx="4.5" fill={c.light} />
       <rect x="14" y="54" width="36" height="8" rx="4" fill="#1d2933" />
-      <rect x="16" y="40" width="32" height="17" rx="7" fill="#5f9ce4" />
+      <rect x="16" y="40" width="32" height="17" rx="7" fill={c.light} />
       <circle cx="32" cy="48.5" r="3.2" fill="#ffc93c" />
-      <rect x="10" y="12" width="44" height="31" rx="13" fill="#2463b5" />
+      <rect x="10" y="12" width="44" height="31" rx="13" fill={c.dark} />
       <rect x="15" y="17" width="34" height="21" rx="9" fill="#13304f" />
       {mood === "normal" && (
         <g>

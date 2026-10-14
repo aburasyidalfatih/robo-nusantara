@@ -277,3 +277,59 @@ canvas.confetti { position: fixed; inset: 0; width: 100%; height: 100%; z-index:
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
   .cloud, .bird { display: none; }
 }
+
+/* ===== transisi layar ===== */
+.screen-enter { position: absolute; inset: 0; animation: screen-in .38s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes screen-in { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
+.hud-title-screen { position: absolute; left: 0; right: 0; top: 0; }
+
+/* ===== profil ===== */
+.profile { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding-block: 24px; padding-left: var(--gut-l); padding-right: var(--gut-r); }
+.profile h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); color: var(--bima-dark); }
+.profile-bima { width: min(150px, 32vw); height: auto; animation: hop 2.4s ease-in-out infinite; }
+.field { display: flex; flex-direction: column; gap: 6px; width: min(100%, 360px); text-align: left; font-weight: 700; color: var(--ink-soft); font-size: .9rem; }
+.field input { font: inherit; font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; color: var(--ink); padding: 12px 16px; border-radius: 16px; border: 3px solid var(--line); background: #fff; text-align: center; -webkit-user-select: text; user-select: text; }
+.field input:focus { border-color: var(--bima); outline: none; }
+.avatars { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; border: 0; padding: 0; margin: 0; }
+.avatars legend { width: 100%; text-align: center; font-weight: 700; color: var(--ink-soft); font-size: .9rem; margin-bottom: 8px; }
+.avatar { width: 76px; height: 76px; border-radius: 22px; border: 3px solid var(--line); background: var(--panel); padding: 8px; box-shadow: 0 4px 0 var(--line); }
+.avatar.is-on { border-color: var(--lamp); background: #fff8dc; box-shadow: 0 4px 0 #d9a92a; transform: scale(1.08); }
+.avatar svg { width: 100%; height: 100%; }
+.big:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ===== peta: dekorasi, bendera, Bima ===== */
+.map-decor { position: absolute; transform: translate(-50%, -50%); pointer-events: none; opacity: .95; }
+.decor-sungai { opacity: .9; }
+.node .flag { position: absolute; top: -22px; right: 14px; width: 22px; height: 30px; animation: flagwave 1.6s ease-in-out infinite; transform-origin: 15% 100%; }
+@keyframes flagwave { 50% { transform: rotate(6deg); } }
+.node.is-done .disc { background: #e9f6df; }
+.map-bima { position: absolute; width: 52px; height: 52px; margin-left: -26px; margin-top: -112px; pointer-events: none; animation: hop 1.6s ease-in-out infinite; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .25)); }
+.pill-btn { border: 0; cursor: pointer; }
+.pill-btn svg { width: 18px; height: 18px; color: var(--c-ulangi); }
+
+/* ===== koleksi ===== */
+.collection { position: relative; z-index: 2; flex: 1; min-height: 0; overflow: auto; padding-block: 8px 24px; padding-left: var(--gut-l); padding-right: var(--gut-r); }
+.collection-hero { display: flex; align-items: center; gap: 14px; max-width: 720px; margin: 0 auto 16px; background: rgba(251, 253, 247, .92); border-radius: 18px; padding: 10px 16px; box-shadow: 0 3px 0 var(--line); }
+.collection-bima { width: 56px; height: 56px; flex: none; }
+.collection-hero p { margin: 0; }
+.badges { list-style: none; margin: 0 auto; padding: 0; max-width: 860px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.collection-hero { max-width: 860px; }
+.badge-card { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; background: var(--panel); border-radius: 18px; padding: 14px 10px; box-shadow: 0 4px 0 var(--line); }
+.badge-card b { font-family: var(--font-display); font-weight: 600; font-size: .95rem; }
+.badge-card small { color: var(--ink-soft); font-size: .78rem; line-height: 1.25; }
+.badge-card:not(.is-earned) { opacity: .7; }
+.badge-icon { width: 84px; height: 84px; }
+.badge-icon.is-earned { animation: badgepop .6s cubic-bezier(.3, 1.4, .4, 1) backwards; }
+@keyframes badgepop { from { transform: scale(.3) rotate(-20deg); opacity: 0; } }
+.new-badge { display: flex; align-items: center; gap: 12px; text-align: left; background: #fff6dc; border: 2px solid #e9cf8e; border-radius: 14px; padding: 8px 12px; margin-bottom: 12px; }
+.new-badge .badge-icon { width: 64px; height: 64px; flex: none; }
+.new-badge small { display: block; font-size: .74rem; text-transform: uppercase; letter-spacing: 1px; color: var(--warn); font-weight: 700; }
+.new-badge b { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; }
+
+/* ===== kartu lebih besar di layar lebar ===== */
+@media (min-width: 1200px) and (min-aspect-ratio: 1/1) {
+  .card .face { width: 64px; height: 64px; }
+  .slot { height: 64px; }
+  .pcard .face { width: 70px; height: 70px; }
+  .track { gap: 14px; padding: 16px 14px; }
+}

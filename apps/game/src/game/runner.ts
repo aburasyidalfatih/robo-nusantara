@@ -84,7 +84,7 @@ async function finish(sim: SimResult, s: BoardScene, my: number): Promise<void> 
 
   if (sim.outcome === "win") {
     useGame.setState({ phase: "running" });
-    store.talk("ok", t.win, { speak: true });
+    store.talk("ok", store.profile ? t.winNamed(store.profile.name) : t.win, { speak: true });
     sfx.win();
     useGame.setState((st) => ({ celebrateNonce: st.celebrateNonce + 1 }));
     await s.celebrate();

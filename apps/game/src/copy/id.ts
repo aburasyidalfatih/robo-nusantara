@@ -24,7 +24,29 @@ export const t = {
   play: "Mulai bermain",
   chooseLevel: "Pilih level",
   teacherPanel: "Panel guru",
-  titleFoot: "Versi pengembangan · Jenjang 1: urutan, belok, perulangan, debugging, proyek",
+  titleFoot: "Urutan · Belok · Perulangan · Debugging · Proyek",
+  continueAs: (name: string) => `Lanjutkan sebagai ${name}`,
+  changePlayer: "Ganti pemain",
+
+  // Profil
+  profileTitle: "Siapa namamu?",
+  profileIntro: "Bima ingin mengenalmu. Tulis namamu dan pilih warna Bima kesukaanmu.",
+  profileName: "Nama panggilan",
+  profileNamePlaceholder: "contoh: Rara",
+  profileAvatar: "Pilih warna Bima",
+  avatarNames: { biru: "Biru", hijau: "Hijau", jingga: "Jingga", ungu: "Ungu" },
+  profileStart: "Ayo mulai!",
+  greet: (name: string) => `Halo, ${name}! Aku Bima. Seret kartu panah biru ke papan kayu di bawah.`,
+  missionGreet: (name: string, mission: string) => `${name}, ${mission.charAt(0).toLowerCase()}${mission.slice(1)}`,
+  winNamed: (name: string) => `Hore, ${name}! Aku sampai di rangkiang dengan semua padi!`,
+
+  // Koleksi
+  collection: "Koleksi",
+  collectionIntro: "Lencana yang sudah kamu raih di Desa Sawah Berundak.",
+  badgeLocked: "Belum diraih",
+  badgeEarned: "Diraih",
+  newBadge: "Lencana baru!",
+  sound: "Suara",
   regionLabel: "Wilayah 1 · pilih level",
   locked: "terkunci",
 

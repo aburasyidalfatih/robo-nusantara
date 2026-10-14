@@ -30,10 +30,10 @@ export function PhaserBoard() {
     });
 
     board.attach(scene);
-    scene.setup(level);
+    scene.setup(level, useGame.getState().profile?.avatar ?? "biru");
 
     const unsubscribe = useGame.subscribe((s, prev) => {
-      if (s.levelIndex !== prev.levelIndex) scene.setup(currentLevel(s));
+      if (s.levelIndex !== prev.levelIndex) scene.setup(currentLevel(s), s.profile?.avatar ?? "biru");
     });
 
     return () => {

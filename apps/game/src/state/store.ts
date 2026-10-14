@@ -29,9 +29,10 @@ import {
 import { jenjang1 } from "@robo/levels";
 import { create } from "zustand";
 import { t } from "../copy/id";
-import { loadSave, writeSave, EMPTY_PROGRESS, type Progress, type Settings } from "./persistence";
+import { BADGES, badgeForLevel } from "../copy/badges";
+import { loadSave, writeSave, EMPTY_PROGRESS, type Profile, type Progress, type Settings } from "./persistence";
 
-export type Screen = "title" | "map" | "play";
+export type Screen = "title" | "profile" | "map" | "play" | "collection";
 export type SayKind = "info" | "ok" | "warn" | "bug" | "hint";
 export type Mood = "normal" | "happy" | "think" | "dizzy";
 export type Phase = "edit" | "running" | "stepping";
@@ -54,6 +55,8 @@ export interface ActiveStep {
 export interface LevelResult {
   levelId: string;
   score: Score;
+  /** Lencana yang baru diraih di level ini, bila ada. */
+  newBadge: string | null;
 }
 
 export const LEVELS: Level[] = jenjang1.levels;
@@ -81,8 +84,11 @@ interface GameState {
   result: LevelResult | null;
   teacherOpen: boolean;
   celebrateNonce: number;
+  /** Bertambah setiap pindah layar; dipakai untuk animasi transisi. */
+  screenNonce: number;
   progress: Progress;
   settings: Settings;
+  profile: Profile | null;
 }
 
 interface GameActions {
@@ -105,6 +111,7 @@ interface GameActions {
   retryLevel(): void;
   setTeacherOpen(open: boolean): void;
   updateSettings(patch: Partial<Settings>): void;
+  saveProfile(profile: Profile): void;
   wipeProgress(): void;
 }
 
@@ -123,8 +130,8 @@ const makeSay = (kind: SayKind, text: string, opts: { mood?: Mood; speak?: boole
 
 export const useGame = create<GameStore>()((set, get) => {
   const persist = () => {
-    const { progress, settings } = get();
-    writeSave({ progress, settings });
+    const { progress, settings, profile } = get();
+    writeSave({ progress, settings, profile });
   };
 
   /** Terapkan hasil penyuntingan program, simpan riwayat untuk Batal. */
@@ -165,22 +172,28 @@ export const useGame = create<GameStore>()((set, get) => {
     result: null,
     teacherOpen: false,
     celebrateNonce: 0,
+    screenNonce: 0,
     progress: saved.progress,
     settings: saved.settings,
+    profile: saved.profile,
 
-    goTo: (screen) => set({ screen, selectedId: null }),
+    goTo: (screen) => set((s) => ({ screen, selectedId: null, screenNonce: s.screenNonce + 1 })),
 
     openLevel: (index, tokens) => {
       const level = LEVELS[index];
       if (!level) return;
       const program = fromTokens(tokens ?? level.prefill ?? [], nextId);
       const tutorialActive = Boolean(level.tutorial && !get().progress.tutorialDone);
+      const name = get().profile?.name;
       const intro =
         level.feature === "kumbang-galat"
           ? makeSay("bug", t.levelIntroGalat, { speak: true })
-          : makeSay("info", tutorialActive ? t.tutorialDrag : level.mission, { speak: true, mood: tutorialActive ? "happy" : "normal" });
-      set({
+          : tutorialActive
+            ? makeSay("info", name ? t.greet(name) : t.tutorialDrag, { speak: true, mood: "happy" })
+            : makeSay("info", name ? t.missionGreet(name, level.mission) : level.mission, { speak: true });
+      set((s) => ({
         screen: "play",
+        screenNonce: s.screenNonce + 1,
         levelIndex: index,
         program,
         history: [],
@@ -194,7 +207,7 @@ export const useGame = create<GameStore>()((set, get) => {
         hintsUsed: 0,
         result: null,
         say: intro,
-      });
+      }));
     },
 
     addCard: (type, listKey, index) => {
@@ -293,13 +306,16 @@ export const useGame = create<GameStore>()((set, get) => {
       const level = currentLevel(state);
       const score = scoreRun(level, state.program, { won: true, hintsUsed: state.hintsUsed });
       const best = Math.max(state.progress.stars[level.id] ?? 0, score.stars);
+      const badge = badgeForLevel(level);
+      const newBadge = badge && !state.progress.badges.includes(badge) ? badge : null;
       set({
-        result: { levelId: level.id, score },
+        result: { levelId: level.id, score, newBadge },
         phase: "edit",
         activeStep: null,
         progress: {
           stars: { ...state.progress.stars, [level.id]: best },
           tutorialDone: state.progress.tutorialDone || Boolean(level.tutorial),
+          badges: newBadge ? [...state.progress.badges, newBadge] : state.progress.badges,
         },
       });
       persist();
@@ -317,8 +333,13 @@ export const useGame = create<GameStore>()((set, get) => {
       persist();
     },
 
+    saveProfile: (profile) => {
+      set({ profile: { name: profile.name.trim().slice(0, 20), avatar: profile.avatar } });
+      persist();
+    },
+
     wipeProgress: () => {
-      set({ progress: { ...EMPTY_PROGRESS, stars: {} } });
+      set({ progress: { ...EMPTY_PROGRESS, stars: {}, badges: [] }, profile: null });
       persist();
     },
   };
@@ -340,6 +361,10 @@ export function isUnlocked(s: Pick<GameState, "progress" | "settings">, index: n
 export function nextPlayableIndex(s: Pick<GameState, "progress" | "settings">): number {
   const i = LEVELS.findIndex((l, idx) => isUnlocked(s, idx) && !((s.progress.stars[l.id] ?? 0) > 0));
   return i < 0 ? LEVELS.length - 1 : i;
+}
+
+export function badgeCount(s: Pick<GameState, "progress">): { earned: number; total: number } {
+  return { earned: s.progress.badges.length, total: BADGES.length };
 }
 
 export function totalStars(s: Pick<GameState, "progress">): number {
